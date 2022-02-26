@@ -28,13 +28,12 @@ public class AuthenticationController {
     private JWTUtil jwtTokenUtil;
 
 
-    @PostMapping("/authenticate")
+    @PostMapping("/auth")
     @ResponseStatus(HttpStatus.OK)
     public AuthResponse createAuthenticationToken(@RequestBody AuthRequest authRequest) {
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
-            System.out.println(authentication);
         } catch (BadCredentialsException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Неверные имя пользователя или пароль", e);
         }
