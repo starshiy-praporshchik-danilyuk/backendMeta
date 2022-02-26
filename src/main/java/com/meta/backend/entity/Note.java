@@ -1,5 +1,6 @@
 package com.meta.backend.entity;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 @Table(name = "notes")
 @NoArgsConstructor
 @Data
+@Builder
 public class Note {
 
     @Id
@@ -20,17 +22,13 @@ public class Note {
     @Column(name = "date_of_create")
     private LocalDate dateOfCreate;
 
-    @Column(name = "date_of_update")
-    private LocalDate dateOfUpdate;
-
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Note(Long id, LocalDate dateOfCreate, LocalDate dateOfUpdate, User user) {
+    public Note(Long id, LocalDate dateOfCreate, User user) {
         this.id = id;
         this.dateOfCreate = dateOfCreate;
-        this.dateOfUpdate = dateOfUpdate;
         this.user = user;
     }
 }

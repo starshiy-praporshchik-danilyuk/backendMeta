@@ -1,5 +1,6 @@
 package com.meta.backend.entity;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ import javax.persistence.*;
 @Table(name = "emotion_note")
 @NoArgsConstructor
 @Data
+@Builder
 public class EmotionNote {
 
     @Id
