@@ -12,7 +12,9 @@ import com.meta.backend.entity.PointNote;
 import com.meta.backend.repo.EmotionNoteRepo;
 import com.meta.backend.repo.NoteRepo;
 import com.meta.backend.repo.PointNoteRepo;
+import com.meta.backend.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,6 +35,8 @@ public class NoteService {
     private NoteConverter noteConverter;
     @Autowired
     private EmotionNoteRepo emotionNoteRepo;
+    @Autowired
+    private UserRepo userRepo;
 
     public NoteDto createNote(NoteDto noteDto){
         Note newNote = noteRepo.save(noteConverter.toEntity(noteDto));
@@ -55,5 +59,13 @@ public class NoteService {
         emotionNoteRepo.saveAll(emotionNotes);
 
         return noteConverter.toDto(newNote);
+    }
+
+    public List<NoteDto> getAllNotes(String username, Pageable pageable){
+        Long userId = userRepo.findByUsername(username).getId();
+        return noteRepo.getAllByUser_Id(userId, pageable)
+                .stream()
+                .map(x -> noteConverter.toDto(x))
+                .collect(Collectors.toList());
     }
 }
