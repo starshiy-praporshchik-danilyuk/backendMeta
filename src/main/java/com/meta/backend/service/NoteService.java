@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,11 +62,15 @@ public class NoteService {
         return noteConverter.toDto(newNote);
     }
 
-    public List<NoteDto> getAllNotes(String username, Pageable pageable){
+    public List<NoteDto> getAllNotesByUsernameAndDate(String username, LocalDate date, Pageable pageable){
         Long userId = userRepo.findByUsername(username).getId();
-        return noteRepo.getAllByUser_Id(userId, pageable)
+        return noteRepo.getAllByUser_IdAndDateOfCreate(userId, date, pageable)
                 .stream()
                 .map(x -> noteConverter.toDto(x))
                 .collect(Collectors.toList());
+    }
+
+    public NoteDto getNoteById(Long id){
+        return noteConverter.toDto(noteRepo.getById(id));
     }
 }
