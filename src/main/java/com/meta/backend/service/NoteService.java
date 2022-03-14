@@ -65,7 +65,7 @@ public class NoteService {
 
     public ResponseNoteListDto getAllNotesByUsername(String username, Pageable pageable){
         Long userId = userRepo.findByUsername(username).getId();
-        long countNotes = noteRepo.count();
+        long countNotes = noteRepo.countAllByUser_Id(userId);
         List<NoteDto> notes = noteRepo.getAllByUser_Id(userId, pageable)
                 .stream()
                 .map(x -> noteConverter.toDto(x))
