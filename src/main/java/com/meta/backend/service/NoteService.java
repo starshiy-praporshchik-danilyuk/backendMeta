@@ -6,6 +6,7 @@ import com.meta.backend.converter.PointNoteConverter;
 import com.meta.backend.dto.EmotionNoteDto;
 import com.meta.backend.dto.NoteDto;
 import com.meta.backend.dto.PointNoteDto;
+import com.meta.backend.dto.ResponseNoteListDto;
 import com.meta.backend.entity.EmotionNote;
 import com.meta.backend.entity.Note;
 import com.meta.backend.entity.PointNote;
@@ -62,12 +63,18 @@ public class NoteService {
         return noteConverter.toDto(newNote);
     }
 
-    public List<NoteDto> getAllNotesByUsername(String username, Pageable pageable){
+    public ResponseNoteListDto getAllNotesByUsername(String username, Pageable pageable){
         Long userId = userRepo.findByUsername(username).getId();
-        return noteRepo.getAllByUser_Id(userId, pageable)
+        long countNotes = noteRepo.count();
+        List<NoteDto> notes = noteRepo.getAllByUser_Id(userId, pageable)
                 .stream()
                 .map(x -> noteConverter.toDto(x))
                 .collect(Collectors.toList());
+        return ResponseNoteListDto.builder()
+                .notes(notes)
+                .numPage(pageable.getPageNumber())
+                .countPages((long) Math.ceil((double) countNotes / pageable.getPageSize()))
+                .build();
     }
 
     public NoteDto getNoteById(Long id){
