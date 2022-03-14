@@ -62,9 +62,9 @@ public class NoteService {
         return noteConverter.toDto(newNote);
     }
 
-    public List<NoteDto> getAllNotesByUsernameAndDate(String username, LocalDate date, Pageable pageable){
+    public List<NoteDto> getAllNotesByUsername(String username, Pageable pageable){
         Long userId = userRepo.findByUsername(username).getId();
-        return noteRepo.getAllByUser_IdAndDateOfCreate(userId, date, pageable)
+        return noteRepo.getAllByUser_Id(userId, pageable)
                 .stream()
                 .map(x -> noteConverter.toDto(x))
                 .collect(Collectors.toList());

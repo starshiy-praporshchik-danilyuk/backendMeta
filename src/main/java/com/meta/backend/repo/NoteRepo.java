@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface NoteRepo extends JpaRepository<Note, Long> {
 
-    List<Note> getAllByUser_IdAndDateOfCreate(Long userId, LocalDate date, Pageable pageable);
+    List<Note> getAllByUser_Id(Long userId, Pageable pageable);
 }
