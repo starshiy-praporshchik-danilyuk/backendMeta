@@ -14,10 +14,9 @@ public class UserService {
         this.userRepo = userRepo;
     }
 
-    public boolean addUser(UserDto newUser) throws Exception {
+    public UserDto addUser(UserDto newUser) throws Exception {
         if(userRepo.existsByUsername(newUser.getUsername()))
-            throw new Exception("USERNAME_ALREADY_EXISTS");
-        userRepo.save(UserConverter.toEntity(newUser));
-        return true;
+            throw new Exception("Пользователь с данных именем уже существует");
+        return UserConverter.toDto(userRepo.save(UserConverter.toEntity(newUser)));
     }
 }

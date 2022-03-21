@@ -1,6 +1,7 @@
 package com.meta.backend.controller;
 
 import com.meta.backend.dto.NoteDto;
+import com.meta.backend.dto.ResponseDto;
 import com.meta.backend.dto.ResponseNoteListDto;
 import com.meta.backend.service.NoteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,17 +17,27 @@ public class NoteController {
     private NoteService noteService;
 
     @PostMapping("/note")
-    public NoteDto createNote(@RequestBody NoteDto noteDto){
-        return noteService.createNote(noteDto);
+    public ResponseDto<NoteDto> createNote(@RequestBody NoteDto noteDto){
+        return ResponseDto.ok(noteService.createNote(noteDto));
     }
 
     @GetMapping("/note/{username}/notes")
-    public ResponseNoteListDto getAllNotes(@PathVariable("username") String username, Pageable pageable){
-        return noteService.getAllNotesByUsername(username, pageable);
+    public ResponseDto<ResponseNoteListDto> getAllNotes(@PathVariable("username") String username, Pageable pageable) throws Exception {
+        return ResponseDto.ok(noteService.getAllNotesByUsername(username, pageable));
     }
 
     @GetMapping("/note/{id}")
-    public NoteDto getNote(@PathVariable("id") Long id){
-        return noteService.getNoteById(id);
+    public ResponseDto<NoteDto> getNote(@PathVariable("id") Long id){
+        return ResponseDto.ok(noteService.getNoteById(id));
+    }
+
+    @PutMapping("/note")
+    public ResponseDto<NoteDto> updateNote(@RequestBody NoteDto noteDto) throws Exception {
+        return ResponseDto.ok(noteService.updateNote(noteDto));
+    }
+
+    @DeleteMapping("/note/{id}")
+    public ResponseDto<Long> deleteNote(@PathVariable("id") Long id) throws Exception {
+        return ResponseDto.ok(noteService.deleteNote(id));
     }
 }

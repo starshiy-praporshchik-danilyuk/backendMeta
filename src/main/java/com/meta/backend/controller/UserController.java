@@ -1,6 +1,7 @@
 package com.meta.backend.controller;
 
 
+import com.meta.backend.dto.ResponseDto;
 import com.meta.backend.dto.UserDto;
 import com.meta.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +17,8 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-
     @PostMapping("/register")
-    public boolean register(@RequestBody UserDto userDto) throws Exception {
-        return userService.addUser(userDto);
+    public ResponseDto<UserDto> register(@RequestBody UserDto userDto) throws Exception {
+        return ResponseDto.ok(userService.addUser(userDto));
     }
 }

@@ -8,4 +8,5 @@ import java.util.List;
 public interface EmotionNoteRepo extends JpaRepository<EmotionNote, Long> {
 
     List<EmotionNote> getAllByNote_Id(Long noteId);
+    void deleteAllByNote_Id(Long id);
 }

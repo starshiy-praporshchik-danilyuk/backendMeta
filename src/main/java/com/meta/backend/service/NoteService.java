@@ -3,10 +3,7 @@ package com.meta.backend.service;
 import com.meta.backend.converter.EmotionNoteConverter;
 import com.meta.backend.converter.NoteConverter;
 import com.meta.backend.converter.PointNoteConverter;
-import com.meta.backend.dto.EmotionNoteDto;
-import com.meta.backend.dto.NoteDto;
-import com.meta.backend.dto.PointNoteDto;
-import com.meta.backend.dto.ResponseNoteListDto;
+import com.meta.backend.dto.*;
 import com.meta.backend.entity.EmotionNote;
 import com.meta.backend.entity.Note;
 import com.meta.backend.entity.PointNote;
@@ -17,8 +14,8 @@ import com.meta.backend.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,7 +60,9 @@ public class NoteService {
         return noteConverter.toDto(newNote);
     }
 
-    public ResponseNoteListDto getAllNotesByUsername(String username, Pageable pageable){
+    public ResponseNoteListDto getAllNotesByUsername(String username, Pageable pageable) throws Exception {
+        if (!userRepo.existsByUsername(username))
+            throw new Exception("Пользователя с данным именем не существует");
         Long userId = userRepo.findByUsername(username).getId();
         long countNotes = noteRepo.countAllByUser_Id(userId);
         List<NoteDto> notes = noteRepo.getAllByUser_Id(userId, pageable)
@@ -79,5 +78,34 @@ public class NoteService {
 
     public NoteDto getNoteById(Long id){
         return noteConverter.toDto(noteRepo.getById(id));
+    }
+
+    @Transactional
+    public NoteDto updateNote(NoteDto noteDto) throws Exception {
+        var oldNote = noteRepo.findById(noteDto.getId())
+                .orElseThrow(() -> new Exception("Записи с данным ID не существует"));
+        if (noteDto.getDate().equals(oldNote.getDateOfCreate()))
+            oldNote.setDateOfCreate(noteDto.getDate());
+        pointNoteRepo.deleteAllByNote_Id(noteDto.getId());
+        List<PointNote> newPointNote = noteDto.getPointNotes().stream()
+                .map(x -> pointNoteConverter.toEntity(x))
+                .collect(Collectors.toList());
+        pointNoteRepo.saveAll(newPointNote);
+        emotionNoteRepo.deleteAllByNote_Id(noteDto.getId());
+        List<EmotionNote> newEmotionNote = noteDto.getEmotionNotes().stream()
+                .map(x -> emotionNoteConverter.toEntity(x))
+                .collect(Collectors.toList());
+        emotionNoteRepo.saveAll(newEmotionNote);
+        return getNoteById(noteDto.getId());
+    }
+
+    @Transactional
+    public Long deleteNote(Long id) throws Exception {
+        if (!noteRepo.existsById(id))
+            throw new Exception("Записи с данным ID не существует");
+        emotionNoteRepo.deleteAllByNote_Id(id);
+        pointNoteRepo.deleteAllByNote_Id(id);
+        noteRepo.deleteById(id);
+        return id;
     }
 }
