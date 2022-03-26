@@ -87,11 +87,17 @@ public class NoteService {
         if (noteDto.getDate().equals(oldNote.getDateOfCreate()))
             oldNote.setDateOfCreate(noteDto.getDate());
         pointNoteRepo.deleteAllByNote_Id(noteDto.getId());
+        for (PointNoteDto pointNoteDto : noteDto.getPointNotes()) {
+            pointNoteDto.setNoteId(noteDto.getId());
+        }
         List<PointNote> newPointNote = noteDto.getPointNotes().stream()
                 .map(x -> pointNoteConverter.toEntity(x))
                 .collect(Collectors.toList());
         pointNoteRepo.saveAll(newPointNote);
         emotionNoteRepo.deleteAllByNote_Id(noteDto.getId());
+        for (EmotionNoteDto emotionNoteDto : noteDto.getEmotionNotes()) {
+            emotionNoteDto.setNoteId(noteDto.getId());
+        }
         List<EmotionNote> newEmotionNote = noteDto.getEmotionNotes().stream()
                 .map(x -> emotionNoteConverter.toEntity(x))
                 .collect(Collectors.toList());
