@@ -6,7 +6,10 @@ import com.meta.backend.dto.ResponseNoteListDto;
 import com.meta.backend.service.NoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 
 @RestController
@@ -29,6 +32,16 @@ public class NoteController {
     @GetMapping("/note/{id}")
     public ResponseDto<NoteDto> getNote(@PathVariable("id") Long id){
         return ResponseDto.ok(noteService.getNoteById(id));
+    }
+
+    @GetMapping("note/{username}/notes/filter")
+    public ResponseDto<ResponseNoteListDto> getNotesByDate(
+                @PathVariable("username") String username,
+                @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+                Pageable pageable
+                ) throws Exception {
+        return ResponseDto.ok(noteService.getNotesByDate(username, startDate, endDate, pageable));
     }
 
     @PutMapping("/note")

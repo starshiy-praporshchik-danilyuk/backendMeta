@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,17 +63,37 @@ public class NoteService {
 
     public ResponseNoteListDto getAllNotesByUsername(String username, Pageable pageable) throws Exception {
         if (!userRepo.existsByUsername(username))
-            throw new Exception("Пользователя с данным именем не существует");
+            throw new Exception("Пользователь с данным именем не существует");
         Long userId = userRepo.findByUsername(username).getId();
-        long countNotes = noteRepo.countAllByUser_Id(userId);
         List<NoteDto> notes = noteRepo.getAllByUser_Id(userId, pageable)
                 .stream()
                 .map(x -> noteConverter.toDto(x))
                 .collect(Collectors.toList());
+        if (notes.isEmpty())
+            throw new Exception("Нет записей для данного пользователя");
         return ResponseNoteListDto.builder()
                 .notes(notes)
                 .numPage(pageable.getPageNumber())
-                .countPages((long) Math.ceil((double) countNotes / pageable.getPageSize()))
+                .countPages((long) Math.ceil((double) notes.size() / pageable.getPageSize()))
+                .build();
+    }
+
+    public ResponseNoteListDto getNotesByDate(String username, LocalDate startDate, LocalDate endDate, Pageable pageable) throws Exception {
+        startDate = startDate.minusDays(1);
+        endDate = endDate.plusDays(1);
+        if (!userRepo.existsByUsername(username))
+            throw new Exception("Пользователь с данным именем не существует");
+        Long userId = userRepo.findByUsername(username).getId();
+        List<NoteDto> notes = noteRepo.getAllByDateOfCreateAfterAndDateOfCreateBeforeAndUser_Id(startDate, endDate, userId)
+                .stream()
+                .map(x -> noteConverter.toDto(x))
+                .collect(Collectors.toList());
+        if (notes.isEmpty())
+            throw new Exception("Нет записей для данного пользователя в указанный промежуток времени");
+        return ResponseNoteListDto.builder()
+                .notes(notes)
+                .numPage(pageable.getPageNumber())
+                .countPages((long) Math.ceil((double) notes.size() / pageable.getPageSize()))
                 .build();
     }
 
@@ -83,7 +104,7 @@ public class NoteService {
     @Transactional
     public NoteDto updateNote(NoteDto noteDto) throws Exception {
         var oldNote = noteRepo.findById(noteDto.getId())
-                .orElseThrow(() -> new Exception("Записи с данным ID не существует"));
+                .orElseThrow(() -> new Exception("Запись с данным ID не существует"));
         if (noteDto.getDate().equals(oldNote.getDateOfCreate()))
             oldNote.setDateOfCreate(noteDto.getDate());
         pointNoteRepo.deleteAllByNote_Id(noteDto.getId());
@@ -108,7 +129,7 @@ public class NoteService {
     @Transactional
     public Long deleteNote(Long id) throws Exception {
         if (!noteRepo.existsById(id))
-            throw new Exception("Записи с данным ID не существует");
+            throw new Exception("Запись с данным ID не существует");
         emotionNoteRepo.deleteAllByNote_Id(id);
         pointNoteRepo.deleteAllByNote_Id(id);
         noteRepo.deleteById(id);
