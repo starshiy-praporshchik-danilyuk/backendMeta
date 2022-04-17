@@ -10,5 +10,7 @@ import java.util.List;
 public interface NoteRepo extends JpaRepository<Note, Long> {
 
     List<Note> getAllByUser_Id(Long userId, Pageable pageable);
-    List<Note> getAllByDateOfCreateAfterAndDateOfCreateBeforeAndUser_Id(LocalDate startDate, LocalDate endDate, Long userId);
+    Long countAllByUser_Id(Long userId);
+    List<Note> getAllByDateOfCreateAfterAndDateOfCreateBeforeAndUser_Id(LocalDate startDate, LocalDate endDate, Long userId, Pageable pageable);
+    Long countAllByDateOfCreateAfterAndDateOfCreateBeforeAndUser_Id(LocalDate startDate, LocalDate endDate, Long userId);
 }

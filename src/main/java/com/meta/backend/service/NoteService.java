@@ -71,10 +71,11 @@ public class NoteService {
                 .collect(Collectors.toList());
         if (notes.isEmpty())
             throw new Exception("Нет записей для данного пользователя");
+        Long count = noteRepo.countAllByUser_Id(userId);
         return ResponseNoteListDto.builder()
                 .notes(notes)
                 .numPage(pageable.getPageNumber())
-                .countPages((long) Math.ceil((double) notes.size() / pageable.getPageSize()))
+                .countPages((long) Math.ceil((double) count / pageable.getPageSize()))
                 .build();
     }
 
@@ -84,16 +85,17 @@ public class NoteService {
         if (!userRepo.existsByUsername(username))
             throw new Exception("Пользователь с данным именем не существует");
         Long userId = userRepo.findByUsername(username).getId();
-        List<NoteDto> notes = noteRepo.getAllByDateOfCreateAfterAndDateOfCreateBeforeAndUser_Id(startDate, endDate, userId)
+        List<NoteDto> notes = noteRepo.getAllByDateOfCreateAfterAndDateOfCreateBeforeAndUser_Id(startDate, endDate, userId, pageable)
                 .stream()
                 .map(x -> noteConverter.toDto(x))
                 .collect(Collectors.toList());
         if (notes.isEmpty())
             throw new Exception("Нет записей для данного пользователя в указанный промежуток времени");
+        Long count = noteRepo.countAllByDateOfCreateAfterAndDateOfCreateBeforeAndUser_Id(startDate, endDate, userId);
         return ResponseNoteListDto.builder()
                 .notes(notes)
                 .numPage(pageable.getPageNumber())
-                .countPages((long) Math.ceil((double) notes.size() / pageable.getPageSize()))
+                .countPages((long) Math.ceil((double) count / pageable.getPageSize()))
                 .build();
     }
 
